@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ProjectService.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">ppmtool</a> &gt; <a href="index.source.html" class="el_package">com.hcl.ppmtool.services</a> &gt; <span class="el_source">ProjectService.java</span></div><h1>ProjectService.java</h1><pre class="source lang-java linenums">package com.hcl.ppmtool.services;
+
+import com.hcl.ppmtool.domain.Backlog;
+import com.hcl.ppmtool.domain.Project;
+import com.hcl.ppmtool.domain.User;
+import com.hcl.ppmtool.exceptions.ProjectIdException;
+import com.hcl.ppmtool.exceptions.ProjectNotFoundException;
+import com.hcl.ppmtool.repositories.BacklogRepository;
+import com.hcl.ppmtool.repositories.ProjectRepository;
+import com.hcl.ppmtool.repositories.UserRepository;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+@Service
+<span class="fc" id="L15">public class ProjectService {</span>
+
+    @Autowired
+    private ProjectRepository projectRepository;
+
+    @Autowired
+    private BacklogRepository backlogRepository;
+
+    @Autowired
+    private UserRepository userRepository;
+
+    public Project saveOrUpdateProject(Project project, String username) {
+<span class="nc bnc" id="L27" title="All 2 branches missed.">        if (project.getId() != null) {</span>
+<span class="nc" id="L28">            Project existingProject = projectRepository.findByProjectIdentifier(project.getProjectIdentifier());</span>
+<span class="nc bnc" id="L29" title="All 4 branches missed.">            if (existingProject != null &amp;&amp; (!existingProject.getProjectLeader().equals(username))) {</span>
+<span class="nc" id="L30">                throw new ProjectNotFoundException(&quot;Project not found in your account&quot;);</span>
+<span class="nc bnc" id="L31" title="All 2 branches missed.">            } else if (existingProject == null) {</span>
+<span class="nc" id="L32">                throw new ProjectNotFoundException(&quot;Project with ID: '&quot; + project.getProjectIdentifier() + &quot;' cannot &quot; +</span>
+                        &quot;be updated because it doesn't exist&quot;);
+            }
+        }
+        try {
+<span class="nc" id="L37">            User user = userRepository.findByUsername(username);</span>
+<span class="nc" id="L38">            project.setUser(user);</span>
+<span class="nc" id="L39">            project.setProjectLeader(user.getUsername());</span>
+<span class="nc" id="L40">            project.setProjectIdentifier(project.getProjectIdentifier().toUpperCase());</span>
+
+<span class="nc bnc" id="L42" title="All 2 branches missed.">            if (project.getId() == null) {</span>
+<span class="nc" id="L43">                Backlog backlog = new Backlog();</span>
+<span class="nc" id="L44">                project.setBacklog(backlog);</span>
+<span class="nc" id="L45">                backlog.setProject(project);</span>
+<span class="nc" id="L46">                backlog.setProjectIdentifier(project.getProjectIdentifier().toUpperCase());</span>
+            }
+
+<span class="nc bnc" id="L49" title="All 2 branches missed.">            if (project.getId() != null) {</span>
+<span class="nc" id="L50">                project.setBacklog(backlogRepository.findByProjectIdentifier(project.getProjectIdentifier().toUpperCase()));</span>
+            }
+
+<span class="nc" id="L53">            return projectRepository.save(project);</span>
+
+<span class="nc" id="L55">        } catch (Exception e) {</span>
+<span class="nc" id="L56">            throw new ProjectIdException(&quot;Project ID '&quot; + project.getProjectIdentifier().toUpperCase() + &quot;' already &quot; +</span>
+                    &quot;exists&quot;);
+        }
+
+    }
+
+
+    public Project findProjectByIdentifier(String projectId, String username) {
+
+        //Only want to return the project if the user looking for it is the owner
+
+<span class="nc" id="L67">        Project project = projectRepository.findByProjectIdentifier(projectId.toUpperCase());</span>
+
+<span class="nc bnc" id="L69" title="All 2 branches missed.">        if (project == null) {</span>
+<span class="nc" id="L70">            throw new ProjectIdException(&quot;Project ID '&quot; + projectId + &quot;' does not exist&quot;);</span>
+
+        }
+
+<span class="nc bnc" id="L74" title="All 2 branches missed.">        if (!project.getProjectLeader().equals(username)) {</span>
+<span class="nc" id="L75">            throw new ProjectNotFoundException(&quot;Project not found in your account&quot;);</span>
+        }
+
+
+<span class="nc" id="L79">        return project;</span>
+    }
+
+    public Iterable&lt;Project&gt; findAllProjects(String username) {
+<span class="nc" id="L83">        return projectRepository.findAllByProjectLeader(username);</span>
+    }
+
+
+    public void deleteProjectByIdentifier(String projectid, String username) {
+
+
+<span class="nc" id="L90">        projectRepository.delete(findProjectByIdentifier(projectid, username));</span>
+<span class="nc" id="L91">    }</span>
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.7.202105040129</span></div></body></html>

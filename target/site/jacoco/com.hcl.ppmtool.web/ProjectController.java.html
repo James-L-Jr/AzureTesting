@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ProjectController.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">ppmtool</a> &gt; <a href="index.source.html" class="el_package">com.hcl.ppmtool.web</a> &gt; <span class="el_source">ProjectController.java</span></div><h1>ProjectController.java</h1><pre class="source lang-java linenums">package com.hcl.ppmtool.web;
+
+
+import com.hcl.ppmtool.domain.Project;
+import com.hcl.ppmtool.services.MapValidationErrorService;
+import com.hcl.ppmtool.services.ProjectService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.validation.BindingResult;
+import org.springframework.web.bind.annotation.*;
+
+import javax.validation.Valid;
+import java.security.Principal;
+
+@RestController
+@RequestMapping(&quot;/api/project&quot;)
+@CrossOrigin
+<span class="fc" id="L19">public class ProjectController {</span>
+
+    @Autowired
+    private ProjectService projectService;
+
+    @Autowired
+    private MapValidationErrorService mapValidationErrorService;
+
+
+    @PostMapping(&quot;&quot;)
+    public ResponseEntity&lt;?&gt; createNewProject(@Valid @RequestBody Project project, BindingResult result, Principal principal){
+
+<span class="nc" id="L31">        ResponseEntity&lt;?&gt; errorMap = mapValidationErrorService.MapValidationService(result);</span>
+<span class="nc bnc" id="L32" title="All 2 branches missed.">        if(errorMap!=null) return errorMap;</span>
+
+<span class="nc" id="L34">        Project project1 = projectService.saveOrUpdateProject(project, principal.getName());</span>
+<span class="nc" id="L35">        return new ResponseEntity&lt;Project&gt;(project1, HttpStatus.CREATED);</span>
+    }
+
+
+    @GetMapping(&quot;/{projectId}&quot;)
+    public ResponseEntity&lt;?&gt; getProjectById(@PathVariable String projectId, Principal principal){
+
+<span class="nc" id="L42">        Project project = projectService.findProjectByIdentifier(projectId, principal.getName());</span>
+
+<span class="nc" id="L44">        return new ResponseEntity&lt;Project&gt;(project, HttpStatus.OK);</span>
+    }
+
+
+    @GetMapping(&quot;/all&quot;)
+<span class="nc" id="L49">    public Iterable&lt;Project&gt; getAllProjects(Principal principal){return projectService.findAllProjects(principal.getName());}</span>
+
+
+    @DeleteMapping(&quot;/{projectId}&quot;)
+    public ResponseEntity&lt;?&gt; deleteProject(@PathVariable String projectId, Principal principal){
+<span class="nc" id="L54">        projectService.deleteProjectByIdentifier(projectId, principal.getName());</span>
+
+<span class="nc" id="L56">        return new ResponseEntity&lt;String&gt;(&quot;Project with ID: '&quot;+projectId+&quot;' was deleted&quot;, HttpStatus.OK);</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.7.202105040129</span></div></body></html>

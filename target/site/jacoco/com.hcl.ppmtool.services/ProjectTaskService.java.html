@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ProjectTaskService.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">ppmtool</a> &gt; <a href="index.source.html" class="el_package">com.hcl.ppmtool.services</a> &gt; <span class="el_source">ProjectTaskService.java</span></div><h1>ProjectTaskService.java</h1><pre class="source lang-java linenums">package com.hcl.ppmtool.services;
+
+import com.hcl.ppmtool.PpmtoolApplication;
+import com.hcl.ppmtool.domain.Backlog;
+import com.hcl.ppmtool.domain.ProjectTask;
+import com.hcl.ppmtool.exceptions.ProjectNotFoundException;
+import com.hcl.ppmtool.repositories.BacklogRepository;
+import com.hcl.ppmtool.repositories.ProjectRepository;
+import com.hcl.ppmtool.repositories.ProjectTaskRepository;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+
+
+@Service
+<span class="fc" id="L18">public class ProjectTaskService {</span>
+<span class="fc" id="L19">    Logger log = LogManager.getLogger(PpmtoolApplication.class);</span>
+
+    @Autowired
+    private BacklogRepository backlogRepository;
+
+    @Autowired
+    private ProjectTaskRepository projectTaskRepository;
+
+    @Autowired
+    private ProjectRepository projectRepository;
+
+    @Autowired
+    private ProjectService projectService;
+
+
+    public ProjectTask addProjectTask(String projectIdentifier, ProjectTask projectTask, String username){
+
+
+            //PTs to be added to a specific project, project != null, BL exists
+<span class="nc" id="L38">            Backlog backlog =  projectService.findProjectByIdentifier(projectIdentifier, username).getBacklog();</span>
+            //set the bl to pt
+<span class="nc" id="L40">            log.warn(backlog);</span>
+<span class="nc" id="L41">            projectTask.setBacklog(backlog);</span>
+            //we want our project sequence to be like this: IDPRO-1  IDPRO-2  ...100 101
+<span class="nc" id="L43">            Integer BacklogSequence = backlog.getPTSequence();</span>
+            // Update the BL SEQUENCE
+<span class="nc" id="L45">            BacklogSequence++;</span>
+
+<span class="nc" id="L47">            backlog.setPTSequence(BacklogSequence);</span>
+
+            //Add Sequence to Project Task
+<span class="nc" id="L50">            projectTask.setProjectSequence(backlog.getProjectIdentifier()+&quot;-&quot;+BacklogSequence);</span>
+<span class="nc" id="L51">            projectTask.setProjectIdentifier(projectIdentifier);</span>
+
+            //INITIAL priority when priority null
+
+            //INITIAL status when status is null
+<span class="nc bnc" id="L56" title="All 4 branches missed.">            if(projectTask.getStatus().equals(&quot;&quot;) || projectTask.getStatus()==null){</span>
+<span class="nc" id="L57">                projectTask.setStatus(&quot;TO_DO&quot;);</span>
+            }
+
+            //Fix bug with priority in Spring Boot Server, needs to check null first
+<span class="nc bnc" id="L61" title="All 4 branches missed.">            if(projectTask.getPriority()==null||projectTask.getPriority()==0){ //In the future we need projectTask.getPriority()== 0 to handle the form</span>
+<span class="nc" id="L62">                projectTask.setPriority(3);</span>
+            }
+
+<span class="nc" id="L65">            return projectTaskRepository.save(projectTask);</span>
+
+
+    }
+
+    public Iterable&lt;ProjectTask&gt;findBacklogById(String id, String username){
+
+<span class="nc" id="L72">        projectService.findProjectByIdentifier(id, username);</span>
+
+<span class="nc" id="L74">        return projectTaskRepository.findByProjectIdentifierOrderByPriority(id);</span>
+    }
+
+
+    public ProjectTask findPTByProjectSequence(String backlog_id, String pt_id, String username){
+
+        //make sure we are searching on an existing backlog
+<span class="nc" id="L81">        projectService.findProjectByIdentifier(backlog_id, username);</span>
+
+
+        //make sure that our task exists
+<span class="nc" id="L85">        ProjectTask projectTask = projectTaskRepository.findByProjectSequence(pt_id);</span>
+
+<span class="nc bnc" id="L87" title="All 2 branches missed.">        if(projectTask == null){</span>
+<span class="nc" id="L88">            throw new ProjectNotFoundException(&quot;Project Task '&quot;+pt_id+&quot;' not found&quot;);</span>
+        }
+
+        //make sure that the backlog/project id in the path corresponds to the right project
+<span class="nc bnc" id="L92" title="All 2 branches missed.">        if(!projectTask.getProjectIdentifier().equals(backlog_id)){</span>
+<span class="nc" id="L93">            throw new ProjectNotFoundException(&quot;Project Task '&quot;+pt_id+&quot;' does not exist in project: '&quot;+backlog_id);</span>
+        }
+
+
+<span class="nc" id="L97">        return projectTask;</span>
+    }
+
+    public ProjectTask updateByProjectSequence(ProjectTask updatedTask, String backlog_id, String pt_id, String username){
+<span class="nc" id="L101">        ProjectTask projectTask = findPTByProjectSequence(backlog_id, pt_id, username);</span>
+
+<span class="nc" id="L103">        projectTask = updatedTask;</span>
+
+<span class="nc" id="L105">        return projectTaskRepository.save(projectTask);</span>
+    }
+
+
+    public void deletePTByProjectSequence(String backlog_id, String pt_id, String username){
+<span class="nc" id="L110">        ProjectTask projectTask = findPTByProjectSequence(backlog_id, pt_id, username);</span>
+<span class="nc" id="L111">        projectTaskRepository.delete(projectTask);</span>
+<span class="nc" id="L112">    }</span>
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.7.202105040129</span></div></body></html>

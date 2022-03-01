@@ -1,0 +1,154 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>User.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">ppmtool</a> &gt; <a href="index.source.html" class="el_package">com.hcl.ppmtool.domain</a> &gt; <span class="el_source">User.java</span></div><h1>User.java</h1><pre class="source lang-java linenums">package com.hcl.ppmtool.domain;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
+
+import javax.persistence.*;
+import javax.validation.constraints.Email;
+import javax.validation.constraints.NotBlank;
+import java.util.*;
+
+@Entity
+public class User implements UserDetails {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @Email(message = &quot;Username needs to be an email&quot;)
+    @NotBlank(message = &quot;username is required&quot;)
+    @Column(unique = true)
+    private String username;
+    @NotBlank(message = &quot;Please enter your full name&quot;)
+    private String fullName;
+    @NotBlank(message = &quot;Password field is required&quot;)
+    private String password;
+    @Transient
+    private String confirmPassword;
+    private Date create_At;
+    private Date update_At;
+
+    //OneToMany with Project
+<span class="fc" id="L32">    @OneToMany(cascade = CascadeType.REFRESH, fetch = FetchType.EAGER, mappedBy = &quot;user&quot;, orphanRemoval = true)</span>
+    private List&lt;Project&gt; projects = new ArrayList&lt;&gt;();
+
+
+<span class="fc" id="L36">    public User() {</span>
+<span class="fc" id="L37">    }</span>
+
+    public Long getId() {
+<span class="fc" id="L40">        return id;</span>
+    }
+
+    public void setId(Long id) {
+<span class="fc" id="L44">        this.id = id;</span>
+<span class="fc" id="L45">    }</span>
+
+    public String getUsername() {
+<span class="fc" id="L48">        return username;</span>
+    }
+
+    public void setUsername(String username) {
+<span class="fc" id="L52">        this.username = username;</span>
+<span class="fc" id="L53">    }</span>
+
+    public String getFullName() {
+<span class="fc" id="L56">        return fullName;</span>
+    }
+
+    public void setFullName(String fullName) {
+<span class="fc" id="L60">        this.fullName = fullName;</span>
+<span class="fc" id="L61">    }</span>
+
+    public String getPassword() {
+<span class="fc" id="L64">        return password;</span>
+    }
+
+    public void setPassword(String password) {
+<span class="fc" id="L68">        this.password = password;</span>
+<span class="fc" id="L69">    }</span>
+
+    public String getConfirmPassword() {
+<span class="nc" id="L72">        return confirmPassword;</span>
+    }
+
+    public void setConfirmPassword(String confirmPassword) {
+<span class="fc" id="L76">        this.confirmPassword = confirmPassword;</span>
+<span class="fc" id="L77">    }</span>
+
+    public Date getCreate_At() {
+<span class="fc" id="L80">        return create_At;</span>
+    }
+
+    public void setCreate_At(Date create_At) {
+<span class="fc" id="L84">        this.create_At = create_At;</span>
+<span class="fc" id="L85">    }</span>
+
+    public Date getUpdate_At() {
+<span class="nc" id="L88">        return update_At;</span>
+    }
+
+    public void setUpdate_At(Date update_At) {
+<span class="nc" id="L92">        this.update_At = update_At;</span>
+<span class="nc" id="L93">    }</span>
+
+    public List&lt;Project&gt; getProjects() {
+<span class="nc" id="L96">        return projects;</span>
+    }
+
+    public void setProjects(List&lt;Project&gt; projects) {
+<span class="nc" id="L100">        this.projects = projects;</span>
+<span class="nc" id="L101">    }</span>
+
+    @PrePersist
+    protected void onCreate() {
+<span class="fc" id="L105">        this.create_At = new Date();</span>
+<span class="fc" id="L106">    }</span>
+
+    @PreUpdate
+    protected void onUpdate() {
+<span class="nc" id="L110">        this.update_At = new Date();</span>
+<span class="nc" id="L111">    }</span>
+
+    /*
+    UserDetails interface methods
+     */
+
+    @Override
+    @JsonIgnore
+    public Collection&lt;? extends GrantedAuthority&gt; getAuthorities() {
+<span class="nc" id="L120">        return Collections.emptyList();</span>
+    }
+
+    @Override
+    @JsonIgnore
+    public boolean isAccountNonExpired() {
+<span class="nc" id="L126">        return true;</span>
+    }
+
+    @Override
+    @JsonIgnore
+    public boolean isAccountNonLocked() {
+<span class="nc" id="L132">        return true;</span>
+    }
+
+    @Override
+    @JsonIgnore
+    public boolean isCredentialsNonExpired() {
+<span class="nc" id="L138">        return true;</span>
+    }
+
+    @Override
+    @JsonIgnore
+    public boolean isEnabled() {
+<span class="nc" id="L144">        return true;</span>
+    }
+
+<span class="fc" id="L147">    public User(Long id, String username, String fullName, String password) {</span>
+<span class="fc" id="L148">        this.id = id;</span>
+<span class="fc" id="L149">        this.username = username;</span>
+<span class="fc" id="L150">        this.fullName = fullName;</span>
+<span class="fc" id="L151">        this.password = password;</span>
+<span class="fc" id="L152">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.7.202105040129</span></div></body></html>

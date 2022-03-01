@@ -1,0 +1,158 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>Project.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">ppmtool</a> &gt; <a href="index.source.html" class="el_package">com.hcl.ppmtool.domain</a> &gt; <span class="el_source">Project.java</span></div><h1>Project.java</h1><pre class="source lang-java linenums">package com.hcl.ppmtool.domain;
+
+
+import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
+import javax.persistence.*;
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.Size;
+import java.util.Date;
+
+@Entity
+public class Project {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+    @NotBlank(message = &quot;Project name is required&quot;)
+    private String projectName;
+    @NotBlank(message =&quot;Project Identifier is required&quot;)
+    @Size(min=4, max=5, message = &quot;Please use 4 to 5 characters&quot;)
+    @Column(updatable = false, unique = true)
+    private String projectIdentifier;
+    @NotBlank(message = &quot;Project description is required&quot;)
+    private String description;
+    @JsonFormat(pattern = &quot;yyyy-mm-dd&quot;)
+    private Date start_date;
+    @JsonFormat(pattern = &quot;yyyy-mm-dd&quot;)
+    private Date end_date;
+    @JsonFormat(pattern = &quot;yyyy-mm-dd&quot;)
+    @Column(updatable = false)
+    private Date created_At;
+    @JsonFormat(pattern = &quot;yyyy-mm-dd&quot;)
+    private Date updated_At;
+
+    @OneToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL, mappedBy = &quot;project&quot;)
+    @JsonIgnore
+    private Backlog backlog;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JsonIgnore
+    private User user;
+
+
+    private String projectLeader;
+
+
+
+<span class="fc" id="L49">    public Project() {</span>
+<span class="fc" id="L50">    }</span>
+
+    public Long getId() {
+<span class="fc" id="L53">        return id;</span>
+    }
+
+    public void setId(Long id) {
+<span class="fc" id="L57">        this.id = id;</span>
+<span class="fc" id="L58">    }</span>
+
+    public String getProjectName() {
+<span class="fc" id="L61">        return projectName;</span>
+    }
+
+    public void setProjectName(String projectName) {
+<span class="fc" id="L65">        this.projectName = projectName;</span>
+<span class="fc" id="L66">    }</span>
+
+    public String getProjectIdentifier() {
+<span class="fc" id="L69">        return projectIdentifier;</span>
+    }
+
+    public void setProjectIdentifier(String projectIdentifier) {
+<span class="fc" id="L73">        this.projectIdentifier = projectIdentifier;</span>
+<span class="fc" id="L74">    }</span>
+
+    public String getDescription() {
+<span class="fc" id="L77">        return description;</span>
+    }
+
+    public void setDescription(String description) {
+<span class="fc" id="L81">        this.description = description;</span>
+<span class="fc" id="L82">    }</span>
+
+    public Date getStart_date() {
+<span class="fc" id="L85">        return start_date;</span>
+    }
+
+    public void setStart_date(Date start_date) {
+<span class="fc" id="L89">        this.start_date = start_date;</span>
+<span class="fc" id="L90">    }</span>
+
+    public Date getEnd_date() {
+<span class="fc" id="L93">        return end_date;</span>
+    }
+
+    public void setEnd_date(Date end_date) {
+<span class="fc" id="L97">        this.end_date = end_date;</span>
+<span class="fc" id="L98">    }</span>
+
+    public Date getCreated_At() {
+<span class="fc" id="L101">        return created_At;</span>
+    }
+
+    public void setCreated_At(Date created_At) {
+<span class="nc" id="L105">        this.created_At = created_At;</span>
+<span class="nc" id="L106">    }</span>
+
+    public Date getUpdated_At() {
+<span class="nc" id="L109">        return updated_At;</span>
+    }
+
+    public void setUpdated_At(Date updated_At) {
+<span class="nc" id="L113">        this.updated_At = updated_At;</span>
+<span class="nc" id="L114">    }</span>
+
+    public Backlog getBacklog() {
+<span class="nc" id="L117">        return backlog;</span>
+    }
+
+    public void setBacklog(Backlog backlog) {
+<span class="nc" id="L121">        this.backlog = backlog;</span>
+<span class="nc" id="L122">    }</span>
+
+    public User getUser() {
+<span class="nc" id="L125">        return user;</span>
+    }
+
+    public void setUser(User user) {
+<span class="nc" id="L129">        this.user = user;</span>
+<span class="nc" id="L130">    }</span>
+
+    public String getProjectLeader() {
+<span class="nc" id="L133">        return projectLeader;</span>
+    }
+
+    public void setProjectLeader(String projectLeader) {
+<span class="nc" id="L137">        this.projectLeader = projectLeader;</span>
+<span class="nc" id="L138">    }</span>
+
+    @PrePersist
+    protected void onCreate(){
+<span class="fc" id="L142">        this.created_At = new Date();</span>
+<span class="fc" id="L143">    }</span>
+
+    @PreUpdate
+    protected void onUpdate(){
+<span class="nc" id="L147">        this.updated_At = new Date();</span>
+<span class="nc" id="L148">    }</span>
+
+
+<span class="fc" id="L151">    public Project(Long id, String projectName, String projectIdentifier, String description) {</span>
+<span class="fc" id="L152">        this.id = id;</span>
+<span class="fc" id="L153">        this.projectName = projectName;</span>
+<span class="fc" id="L154">        this.projectIdentifier = projectIdentifier;</span>
+<span class="fc" id="L155">        this.description = description;</span>
+<span class="fc" id="L156">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.7.202105040129</span></div></body></html>

@@ -1,0 +1,7 @@
+com\hcl\ppmtool\repositoriestests\UserRepositoryTest.class
+com\hcl\ppmtool\repositoriestests\ProjectRepositoryTest.class
+com\hcl\ppmtool\domaintests\ProjectTest.class
+com\hcl\ppmtool\PpmtoolApplicationTests.class
+com\hcl\ppmtool\domaintests\UserTest.class
+com\hcl\ppmtool\servicestests\ProjectServiceTest.class
+com\hcl\ppmtool\servicestests\UserServiceTest.class
